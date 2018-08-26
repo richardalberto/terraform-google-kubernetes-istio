@@ -1,4 +1,4 @@
-# terraform-gke-istio
+# terraform-google-kubernetes-istio
 Create a kubernetes cluster with istio enabled
 
 ## Usage
