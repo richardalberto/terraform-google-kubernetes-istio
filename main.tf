@@ -1,3 +1,8 @@
+provider "google" {
+  project     = "${var.gcp_project}"
+  region      = "${var.gcp_region}"
+}
+
 provider "kubernetes" {
   host = "https://${google_container_cluster.gke_cluster.endpoint}"
   username = "${var.master_username}"
@@ -35,7 +40,7 @@ data "template_file" "kubeconfig" {
 
 resource "google_container_cluster" "gke_cluster" {
   name   = "${var.cluster_name}"
-  region = "${var.cluster_region}"
+  region = "${var.gcp_region}"
   initial_node_count = "${var.node_count}"
 
   master_auth {
