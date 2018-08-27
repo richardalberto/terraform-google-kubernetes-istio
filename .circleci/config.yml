@@ -1,0 +1,27 @@
+version: 2
+jobs:
+  validate:
+    docker:
+      - image: hashicorp/terraform:light
+    steps:
+      - checkout
+      - run:
+          name: validate
+          command: |
+            terraform init
+            terraform validate
+  lint:
+    docker:
+      - image: wata727/tflint:0.7.2
+    steps:
+      - checkout
+      - run:
+          name: lint
+          command: |
+            tflint *.tf
+workflows:
+  version: 2
+  lint:
+    jobs:
+      - validate
+      - lint
