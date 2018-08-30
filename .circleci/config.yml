@@ -27,10 +27,30 @@ jobs:
           name: lint
           command: |
             tflint *.tf
+
+  publish-github-release:
+    docker:
+      - image: cibuilds/github:0.10
+    steps:
+      - run:
+          name: "Publish Release on GitHub"
+          command: |
+            VERSION=$(my-binary --version)
+            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} .
 workflows:
   version: 2
-  lint:
+  build-n-release:
     jobs:
-      - fmt
-      - validate
       - lint
+      - validate
+      - fmt
+      - publish-github-release:
+        requires:
+          - lint
+          - validate
+          - fmt
+        filters:
+          branches:
+            ignore: /.*/
+          tags:
+            only: /^\d+\.\d+\.\d+$/
