@@ -1,14 +1,22 @@
 version: 2
 jobs:
-  validate:
+  fmt:
     docker:
       - image: hashicorp/terraform:light
     steps:
       - checkout
       - run:
-          name: validate
+        name: Check terraform formatting
+        command: "[ -z \"$(terraform fmt -write=false)\" ] || { terraform fmt -write=false -diff; exit 1; }"
+  validate:
+    docker:
+      - image: docker.io/richardalberto/terraform-google-kubernetes-istio
+    steps:
+      - checkout
+      - run:
+          name: Validate terrafrom files
           command: |
-            terraform init
+            terraform init -input=false
             terraform validate
   lint:
     docker:
@@ -23,5 +31,6 @@ workflows:
   version: 2
   lint:
     jobs:
+      - fmt
       - validate
       - lint
