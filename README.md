@@ -3,15 +3,11 @@ Create a kubernetes cluster with istio enabled
 
 ## Usage
 ```
-// Configure the Google Cloud provider
-provider "google" {
-  credentials = "${file("svc-account.json")}"
-  project     = "project-id"
-  region      = "us-east4"
-}
-
 module "k8s_cluster" {
   source = "github.com/richardalberto/terraform-google-kubernetes-istio"
+
+  gcp_project = "google-project-id"
+  gcp_region  = "us-east4"
   
   cluster_name    = "test-cluster"
   cluster_region  = "us-east4"

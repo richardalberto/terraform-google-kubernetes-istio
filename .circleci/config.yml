@@ -34,10 +34,11 @@ jobs:
     docker:
       - image: cibuilds/github:0.10
     steps:
+      - checkout
       - run:
           name: "Publish Release on GitHub"
           command: |
-            VERSION=$(my-binary --version)
+            VERSION=$(cat version/version)
             ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} .
 
 workflows:
@@ -47,12 +48,15 @@ workflows:
       - lint
       - validate
       - fmt
+      - approval:
+          type: approval
+          requires:
+            - lint
+            - validate
+            - fmt
+          filters:
+            branches:
+              only: master
       - publish-github-release:
-        type: approval
-        requires:
-          - lint
-          - validate
-          - fmt
-        filters:
-          branches:
-            only: master
+          requires:
+            - approval
