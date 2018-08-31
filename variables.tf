@@ -5,6 +5,7 @@ variable "gcp_project" {
 variable "gcp_region" {
   description = "The region in which all GCP resources will be launched."
 }
+
 variable "cluster_name" {
   description = "GKE cluster name"
 }

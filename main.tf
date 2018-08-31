@@ -1,10 +1,10 @@
 provider "google" {
-  project     = "${var.gcp_project}"
-  region      = "${var.gcp_region}"
+  project = "${var.gcp_project}"
+  region  = "${var.gcp_region}"
 }
 
 provider "kubernetes" {
-  host = "https://${google_container_cluster.gke_cluster.endpoint}"
+  host     = "https://${google_container_cluster.gke_cluster.endpoint}"
   username = "${var.master_username}"
   password = "${var.master_password}"
 
@@ -21,7 +21,7 @@ provider "helm" {
     host     = "https://${google_container_cluster.gke_cluster.endpoint}"
     username = "${var.master_username}"
     password = "${var.master_password}"
-    
+
     client_certificate     = "${base64decode(google_container_cluster.gke_cluster.master_auth.0.client_certificate)}"
     client_key             = "${base64decode(google_container_cluster.gke_cluster.master_auth.0.client_key)}"
     cluster_ca_certificate = "${base64decode(google_container_cluster.gke_cluster.master_auth.0.cluster_ca_certificate)}"
@@ -30,6 +30,7 @@ provider "helm" {
 
 data "template_file" "kubeconfig" {
   template = "${file("${path.module}/templates/kube-config.tpl")}"
+
   vars {
     ca_certificate = "${google_container_cluster.gke_cluster.master_auth.0.cluster_ca_certificate}"
     server         = "https://${google_container_cluster.gke_cluster.endpoint}"
@@ -39,8 +40,8 @@ data "template_file" "kubeconfig" {
 }
 
 resource "google_container_cluster" "gke_cluster" {
-  name   = "${var.cluster_name}"
-  region = "${var.gcp_region}"
+  name               = "${var.cluster_name}"
+  region             = "${var.gcp_region}"
   initial_node_count = "${var.node_count}"
 
   master_auth {

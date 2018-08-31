@@ -6,11 +6,12 @@ jobs:
     steps:
       - checkout
       - run:
-        name: Check terraform formatting
-        command: "[ -z \"$(terraform fmt -write=false)\" ] || { terraform fmt -write=false -diff; exit 1; }"
+          name: Check terraform formatting
+          command: '[ -z "$(terraform fmt -write=false)" ] || { terraform fmt -write=false -diff; exit 1; }'
+
   validate:
     docker:
-      - image: docker.io/richardalberto/terraform-google-kubernetes-istio
+      - image: richardalberto/terraform-helm
     steps:
       - checkout
       - run:
@@ -18,6 +19,7 @@ jobs:
           command: |
             terraform init -input=false
             terraform validate
+
   lint:
     docker:
       - image: wata727/tflint:0.7.2
@@ -37,7 +39,7 @@ jobs:
           command: |
             VERSION=$(my-binary --version)
             ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} .
-            
+
 workflows:
   version: 2
   build-n-release:
@@ -46,6 +48,7 @@ workflows:
       - validate
       - fmt
       - publish-github-release:
+        type: approval
         requires:
           - lint
           - validate
