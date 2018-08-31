@@ -32,14 +32,22 @@ jobs:
 
   publish-github-release:
     docker:
-      - image: cibuilds/github:0.10
+      - image: alpine
     steps:
       - checkout
       - run:
           name: "Publish Release on GitHub"
           command: |
+            apk add curl
+            
             VERSION=$(cat version/version)
-            ghr -t ${GITHUB_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${VERSION} .
+            curl --data '{"tag_name": "v$VERSION",
+              "target_commitish": "${CIRCLE_SHA1}",
+              "name": "${VERSION}",
+              "body": "",
+              "draft": false,
+              "prerelease": false}' \
+            https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases?access_token=${GITHUB_TOKEN}
 
 workflows:
   version: 2
