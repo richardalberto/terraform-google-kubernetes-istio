@@ -1,4 +1,4 @@
-# terraform-google-kubernetes-istio
+# terraform-google-kubernetes-istio [![CircleCI](https://circleci.com/gh/richardalberto/terraform-google-kubernetes-istio/tree/master.svg?style=svg)](https://circleci.com/gh/richardalberto/terraform-google-kubernetes-istio/tree/master)
 Create a kubernetes cluster with istio enabled
 
 ## Usage
