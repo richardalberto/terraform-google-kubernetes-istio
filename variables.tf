@@ -33,3 +33,11 @@ variable "helm_repository" {
 variable "istio_version" {
   description = "Istio chart version"
 }
+
+variable "min_node_count" {
+  description = "GKE cluster initial node count and min node count value"
+}
+
+variable "max_node_count" {
+  description = "GKE cluster maximun node autoscaling count"
+}
