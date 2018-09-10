@@ -78,6 +78,7 @@ resource "null_resource" "helm_init" {
       echo "${data.template_file.kubeconfig.rendered}" > /tmp/kube-config
       export KUBECONFIG=/tmp/kube-config
       helm init --tiller-namespace kube-system --service-account tiller --wait --upgrade
+      helm repo update
     EOT
   }
 }
