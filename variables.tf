@@ -29,3 +29,7 @@ variable "cluster_region" {
 variable "helm_repository" {
   description = "Helm repository where the istio chart release is published"
 }
+
+variable "istio_version" {
+  description = "Istio chart version"
+}

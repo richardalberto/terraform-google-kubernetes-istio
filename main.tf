@@ -92,7 +92,7 @@ resource "helm_release" "istio" {
   name       = "istio"
   chart      = "istio"
   repository = "${helm_repository.istio_repository.metadata.0.name}"
-  version    = "1.0.1"
+  version    = "${var.istio_version}"
 
   namespace = "istio-system"
 
