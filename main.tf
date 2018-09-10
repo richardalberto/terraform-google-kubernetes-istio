@@ -126,5 +126,10 @@ resource "helm_release" "istio" {
     value = true
   }
 
+  set {
+    name  = "security.identityDomain"
+    value = ""
+  }
+
   depends_on = ["null_resource.helm_init", "null_resource.tiller_rbac"]
 }
