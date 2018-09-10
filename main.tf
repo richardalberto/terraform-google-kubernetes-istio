@@ -57,6 +57,17 @@ resource "google_container_cluster" "gke_cluster" {
       "https://www.googleapis.com/auth/monitoring",
     ]
   }
+
+  node_pool {
+    name  = "${var.cluster_name}-pool",
+    region = "${var.gcp_region}",
+    node_count ="${var.min_node_counts}"
+
+    autoscaling {
+      min_node_count  = "${var.min_node_count}",
+      max_node_count  = "${var.max_node_count}"
+    }
+  }
 }
 
 resource "null_resource" "tiller_rbac" {
