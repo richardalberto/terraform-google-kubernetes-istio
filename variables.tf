@@ -10,10 +10,6 @@ variable "cluster_name" {
   description = "GKE cluster name"
 }
 
-variable "node_count" {
-  description = "GKE cluster node count"
-}
-
 variable "master_username" {
   description = "GKE cluster master username"
 }

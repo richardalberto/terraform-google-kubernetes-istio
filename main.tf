@@ -42,7 +42,6 @@ data "template_file" "kubeconfig" {
 resource "google_container_cluster" "gke_cluster" {
   name               = "${var.cluster_name}"
   region             = "${var.gcp_region}"
-  initial_node_count = "${var.node_count}"
 
   master_auth {
     username = "${var.master_username}"
