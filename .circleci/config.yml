@@ -41,13 +41,20 @@ jobs:
             apk add curl
             
             VERSION=$(cat version/version)
-            curl --data '{"tag_name": "v$VERSION",
-              "target_commitish": "${CIRCLE_SHA1}",
-              "name": "${VERSION}",
-              "body": "",
-              "draft": false,
-              "prerelease": false}' \
-            https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases?access_token=${GITHUB_TOKEN}
+            DATA=$(cat <<-EOM
+              {
+                "tag_name": "$VERSION",
+                "target_commitish": "${CIRCLE_SHA1}",
+                "name": "${VERSION}",
+                "body": "",
+                "draft": false,
+                "prerelease": false
+              }
+            EOM
+            )
+            echo ${DATA}
+
+            curl --data "${DATA}" https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases?access_token=${GITHUB_TOKEN}
 
 workflows:
   version: 2
