@@ -60,7 +60,7 @@ resource "google_container_cluster" "gke_cluster" {
 
 resource "google_container_node_pool" "gke_node_pool" {
   name       = "${var.cluster_name}-pool"
-  zone       = "${var.gcp_region}"
+  region     = "${var.gcp_region}"
   cluster    = "${google_container_cluster.gke_cluster.name}"
   node_count = "${var.min_node_count}"
 
