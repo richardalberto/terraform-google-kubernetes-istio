@@ -61,7 +61,7 @@ resource "google_container_cluster" "gke_cluster" {
   node_pool {
     name       = "${var.cluster_name}-pool"
     region     = "${var.gcp_region}"
-    node_count = "${var.min_node_counts}"
+    node_count = "${var.min_node_count}"
 
     autoscaling {
       min_node_count = "${var.min_node_count}"
