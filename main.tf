@@ -59,13 +59,13 @@ resource "google_container_cluster" "gke_cluster" {
   }
 
   node_pool {
-    name  = "${var.cluster_name}-pool",
-    region = "${var.gcp_region}",
-    node_count ="${var.min_node_counts}"
+    name       = "${var.cluster_name}-pool"
+    region     = "${var.gcp_region}"
+    node_count = "${var.min_node_counts}"
 
     autoscaling {
-      min_node_count  = "${var.min_node_count}",
-      max_node_count  = "${var.max_node_count}"
+      min_node_count = "${var.min_node_count}"
+      max_node_count = "${var.max_node_count}"
     }
   }
 }
