@@ -19,6 +19,17 @@ jobs:
           command: |
             terraform init -input=false
             terraform validate
+          environment:
+            TF_VAR_gcp_project: project
+            TF_VAR_gcp_region: region
+            TF_VAR_min_node_count: 1
+            TF_VAR_master_username: username
+            TF_VAR_helm_repository: repository
+            TF_VAR_istio_version: version
+            TF_VAR_master_password: password
+            TF_VAR_cluster_region: zone
+            TF_VAR_max_node_count: 1
+            TF_VAR_cluster_name: name
 
   lint:
     docker:
