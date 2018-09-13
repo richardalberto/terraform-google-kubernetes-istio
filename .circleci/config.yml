@@ -1,3 +1,9 @@
+
+aliases:
+  - &curl-install
+    name: Install curl
+    command: apk update && apk add curl
+
 version: 2
 jobs:
   fmt:
@@ -41,31 +47,82 @@ jobs:
           command: |
             tflint *.tf
 
+  check-version:
+    docker:
+      - image: alpine
+    steps:
+      - checkout
+      - run: *curl-install
+      - run:
+          name: Check version doesn't exists already
+          command: scripts/check-version.sh
+
+  e2e:
+    docker:
+      - image: google/cloud-sdk
+    environment:
+      GCP_REGION: us-east1
+      HELM_REPOSITORY: https://richardalberto.github.io/terraform-google-kubernetes-istio
+      GOOGLE_APPLICATION_CREDENTIALS: svc-account.json
+    steps:
+      - checkout
+      - run:
+          name: Activate service account for gcloud
+          command: |-
+            echo $GCLOUD_SERVICE_KEY | base64 -d > $GOOGLE_APPLICATION_CREDENTIALS
+            gcloud auth activate-service-account --key-file $GOOGLE_APPLICATION_CREDENTIALS
+      - run:
+          name: Install terraform
+          command: |-
+            apt update && apt install unzip
+
+            curl https://releases.hashicorp.com/terraform/0.11.8/terraform_0.11.8_linux_amd64.zip > /tmp/terraform.zip
+            unzip /tmp/terraform.zip && chmod +x terraform
+            mv terraform /usr/local/bin/
+      - run:
+          name: Install helm
+          command: |-
+            curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash
+            helm init --client-only
+      - run:
+          name: Install helm provider
+          command: |-
+            curl -Ls -o terraform-provider-helm.tar.gz https://github.com/mcuadros/terraform-provider-helm/releases/download/v0.6.0/terraform-provider-helm_v0.6.0_linux_amd64.tar.gz
+            tar -xzvf terraform-provider-helm.tar.gz
+            mkdir -p ~/.terraform.d/plugins/
+            mv terraform-provider-helm*/terraform-provider-helm ~/.terraform.d/plugins/
+      - run:
+          name: Run e2e tests
+          command: |-
+            terraform init
+            terraform apply -auto-approve \
+              -var "gcp_project=$GCP_PROJECT" \
+              -var "gcp_region=$GCP_REGION" \
+              -var "cluster_name=tf-gc-k8s-istio-${CIRCLE_BRANCH}" \
+              -var "master_username=$CLUSTER_USERNAME" \
+              -var "master_password=$CLUSTER_PASSWORD" \
+              -var "cluster_region=$GCP_REGION" \
+              -var "helm_repository=$HELM_REPOSITORY" \
+              -var "istio_version=1.1.0" \
+              -var "min_node_count=1" \
+              -var "max_node_count=3"
+      - run:
+          name: Cleanup
+          command: |-
+            terraform destroy -auto-approve || true
+            gcloud container clusters delete tf-gc-k8s-istio-${CIRCLE_BRANCH} --project $GCP_PROJECT --region $GCP_REGION --quiet || true
+          when: always
+
   publish-github-release:
     docker:
       - image: alpine
     steps:
       - checkout
+      - run: *curl-install
       - run:
           name: "Publish Release on GitHub"
-          command: |
-            apk add curl
-            
-            VERSION=$(cat version/version)
-            DATA=$(cat <<-EOM
-              {
-                "tag_name": "$VERSION",
-                "target_commitish": "${CIRCLE_SHA1}",
-                "name": "${VERSION}",
-                "body": "",
-                "draft": false,
-                "prerelease": false
-              }
-            EOM
-            )
-            echo ${DATA}
+          command: scripts/gh-publish.sh
 
-            curl --data "${DATA}" https://api.github.com/repos/${CIRCLE_PROJECT_USERNAME}/${CIRCLE_PROJECT_REPONAME}/releases?access_token=${GITHUB_TOKEN}
 
 workflows:
   version: 2
@@ -74,15 +131,16 @@ workflows:
       - lint
       - validate
       - fmt
-      - approval:
-          type: approval
+      - check-version
+      - e2e:
           requires:
             - lint
             - validate
             - fmt
+            - check-version
+      - publish-github-release:
+          requires:
+            - e2e
           filters:
             branches:
               only: master
-      - publish-github-release:
-          requires:
-            - approval
