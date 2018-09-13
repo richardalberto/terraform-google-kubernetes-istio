@@ -40,13 +40,20 @@ data "template_file" "kubeconfig" {
 }
 
 resource "google_container_cluster" "gke_cluster" {
-  name               = "${var.cluster_name}"
-  region             = "${var.gcp_region}"
-  initial_node_count = "${var.min_node_count}"
+  name   = "${var.cluster_name}"
+  region = "${var.gcp_region}"
 
   master_auth {
     username = "${var.master_username}"
     password = "${var.master_password}"
+  }
+
+  lifecycle {
+    ignore_changes = ["node_pool"]
+  }
+
+  node_pool {
+    name = "default-pool"
   }
 
   node_config {
