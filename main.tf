@@ -20,6 +20,8 @@ provider "kubernetes" {
 provider "helm" {
   service_account = "tiller"
   namespace       = "kube-system"
+  install_tiller  = true
+  debug           = true
 
   kubernetes {
     host     = "https://${google_container_cluster.gke_cluster.endpoint}"
