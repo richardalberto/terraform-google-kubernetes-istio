@@ -17,7 +17,7 @@ jobs:
 
   validate:
     docker:
-      - image: richardalberto/terraform-helm
+      - image: richardalberto/terraform-helm:1.1.0
     steps:
       - checkout
       - run:

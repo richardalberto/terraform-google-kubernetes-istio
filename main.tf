@@ -18,8 +18,6 @@ provider "kubernetes" {
 }
 
 provider "helm" {
-  version = "~> 6.0"
-
   service_account = "tiller"
   namespace       = "kube-system"
 
