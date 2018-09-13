@@ -1,0 +1,25 @@
+apiVersion: v1
+entries:
+  istio:
+  - apiVersion: v1
+    appVersion: 1.1.0
+    created: 2018-09-13T01:03:16.315446772-04:00
+    description: Helm chart for all istio components
+    digest: c43e4c53fe422cbe44ba7da7aa41aecf727db4cd2a34996755c07d0105157326
+    engine: gotpl
+    icon: https://istio.io/favicons/android-192x192.png
+    keywords:
+    - istio
+    - security
+    - sidecarInjectorWebhook
+    - mixer
+    - pilot
+    - galley
+    name: istio
+    sources:
+    - http://github.com/istio/istio
+    tillerVersion: '>=2.7.2-0'
+    urls:
+    - https://richardalberto.github.io/terraform-google-kubernetes-istio/istio-1.1.0.tgz
+    version: 1.1.0
+generated: 2018-09-13T01:03:16.308292952-04:00
