@@ -23,7 +23,7 @@ output "cluster_ca_certificate" {
 }
 
 output "kube_config" {
-    value = <<EOT
+  value = <<EOT
       apiVersion: v1
       clusters:
       - cluster:
