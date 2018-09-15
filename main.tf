@@ -80,7 +80,7 @@ resource "helm_repository" "istio_repository" {
 
 resource "null_resource" "helm_init" {
   provisioner "local-exec" {
-    command = "echo \"$(terraform output kube_config)\" > ./kubeconfig"
+    command = "echo \"$(terraform output kube_config)\" > ./kubeconfig && cat ./kubeconfig"
   }
 
   provisioner "local-exec" {
@@ -91,7 +91,7 @@ resource "null_resource" "helm_init" {
     command = <<EOT
       kubectl create serviceaccount --namespace kube-system tiller
       kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
-      ./helm init --upgrade --service-account tiller --wait
+      helm init --upgrade --service-account tiller --wait
     EOT
 
     environment {
