@@ -78,6 +78,27 @@ resource "helm_repository" "istio_repository" {
   url  = "${var.helm_repository}"
 }
 
+resource "null_resource" "helm_init" {
+  provisioner "local-exec" {
+    command = "echo \"$(terraform output kube_config)\" > ./kubeconfig"
+  }
+  provisioner "local-exec" {
+    command = "export KUBECONFIG=./kubeconfig"
+  }
+  provisioner "local-exec" {
+    command =<<EOT
+      kubectl create serviceaccount --namespace kube-system tiller
+      kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+      ./helm init --upgrade --service-account tiller --wait
+    EOT
+    environment {
+      KUBECONFIG = "./kubeconfig"
+    }
+  }
+
+  depends_on = ["google_container_node_pool.gke_node_pool"]
+}
+
 resource "helm_release" "istio" {
   name       = "istio"
   chart      = "istio"
@@ -120,4 +141,6 @@ resource "helm_release" "istio" {
     name  = "security.identityDomain"
     value = ""
   }
+
+  depends_on = ["null_resource.helm_init"]
 }

@@ -7,3 +7,8 @@
 
 # .tfvars files
 *.tfvars
+
+# .tfvars files
+*.tfvars
+
+svc-account.json
