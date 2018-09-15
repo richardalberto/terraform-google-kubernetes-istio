@@ -41,7 +41,7 @@ preferences: {}
 users:
 - name: admin
   user:
-    client-certificate: ${google_container_cluster.gke_cluster.master_auth.0.client_certificate}
-    client-key: ${google_container_cluster.gke_cluster.master_auth.0.client_key}
+    password: ${var.master_username}
+    username: ${var.master_password}
 EOT
 }
