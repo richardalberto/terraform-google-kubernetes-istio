@@ -80,23 +80,18 @@ resource "helm_repository" "istio_repository" {
 
 resource "null_resource" "helm_init" {
   provisioner "local-exec" {
-    command = "echo \"$(terraform output kube_config)\" > ./kubeconfig && cat ./kubeconfig"
-  }
-
-  provisioner "local-exec" {
-    command = "export KUBECONFIG=./kubeconfig"
-  }
-
-  provisioner "local-exec" {
     command = <<EOT
+      echo '${base64decode(google_container_cluster.gke_cluster.master_auth.0.cluster_ca_certificate)}' > /tmp/ca.crt
+      kubectl config --kubeconfig=ci set-cluster k8s --server=https://${google_container_cluster.gke_cluster.endpoint} --certificate-authority=/tmp/ca.crt
+      kubectl config --kubeconfig=ci set-credentials admin --username=${var.master_username} --password=${var.master_password}
+      kubectl config --kubeconfig=ci set-context k8s-ci --cluster=k8s --namespace=default --user=admin
+      kubectl config --kubeconfig=ci use-context k8s-ci
+      export KUBECONFIG=ci
+
       kubectl create serviceaccount --namespace kube-system tiller
       kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
       helm init --upgrade --service-account tiller --wait
     EOT
-
-    environment {
-      KUBECONFIG = "./kubeconfig"
-    }
   }
 
   depends_on = ["google_container_node_pool.gke_node_pool"]

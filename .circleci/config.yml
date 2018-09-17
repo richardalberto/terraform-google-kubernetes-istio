@@ -92,7 +92,7 @@ jobs:
             mkdir -p ~/.terraform.d/plugins/
             mv terraform-provider-helm*/terraform-provider-helm ~/.terraform.d/plugins/
       - run:
-          name: Run e2e tests
+          name: Terraform apply
           command: |-
             terraform init
             terraform apply -auto-approve \
@@ -107,9 +107,13 @@ jobs:
               -var "min_node_count=1" \
               -var "max_node_count=3"
       - run:
+          name: Terrafrom destroy
+          command: |-
+            terraform destroy -auto-approve
+          when: always
+      - run:
           name: Cleanup
           command: |-
-            terraform destroy -auto-approve || true
             gcloud container clusters delete tf-gc-k8s-istio-${CIRCLE_BRANCH} --project $GCP_PROJECT --region $GCP_REGION --quiet || true
           when: always
 
