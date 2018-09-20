@@ -17,23 +17,6 @@ provider "kubernetes" {
   cluster_ca_certificate = "${base64decode(google_container_cluster.gke_cluster.master_auth.0.cluster_ca_certificate)}"
 }
 
-provider "helm" {
-  service_account = "tiller"
-  namespace       = "kube-system"
-  install_tiller  = true
-  debug           = true
-
-  kubernetes {
-    host     = "https://${google_container_cluster.gke_cluster.endpoint}"
-    username = "${var.master_username}"
-    password = "${var.master_password}"
-
-    client_certificate     = "${base64decode(google_container_cluster.gke_cluster.master_auth.0.client_certificate)}"
-    client_key             = "${base64decode(google_container_cluster.gke_cluster.master_auth.0.client_key)}"
-    cluster_ca_certificate = "${base64decode(google_container_cluster.gke_cluster.master_auth.0.cluster_ca_certificate)}"
-  }
-}
-
 resource "google_container_cluster" "gke_cluster" {
   name   = "${var.cluster_name}"
   region = "${var.gcp_region}"
@@ -73,72 +56,38 @@ resource "google_container_node_pool" "gke_node_pool" {
   }
 }
 
-resource "helm_repository" "istio_repository" {
-  name = "istio_repository"
-  url  = "${var.helm_repository}"
-}
-
-resource "null_resource" "helm_init" {
+resource "null_resource" "install_istio" {
   provisioner "local-exec" {
     command = <<EOT
-      echo '${base64decode(google_container_cluster.gke_cluster.master_auth.0.cluster_ca_certificate)}' > /tmp/ca.crt
-      kubectl config --kubeconfig=ci set-cluster k8s --server=https://${google_container_cluster.gke_cluster.endpoint} --certificate-authority=/tmp/ca.crt
-      kubectl config --kubeconfig=ci set-credentials admin --username=${var.master_username} --password=${var.master_password}
+      echo "$${CA_CERTIFICATE}" > ca.crt
+      kubectl config --kubeconfig=ci set-cluster k8s --server=$${K8S_SERVER} --certificate-authority=ca.crt
+      kubectl config --kubeconfig=ci set-credentials admin --username=$${K8S_USERNAME} --password=$${K8S_PASSWORD}
       kubectl config --kubeconfig=ci set-context k8s-ci --cluster=k8s --namespace=default --user=admin
       kubectl config --kubeconfig=ci use-context k8s-ci
       export KUBECONFIG=ci
 
-      kubectl create serviceaccount --namespace kube-system tiller
-      kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller
+      kubectl create serviceaccount --namespace kube-system tiller || true
+      kubectl create clusterrolebinding tiller-cluster-rule --clusterrole=cluster-admin --serviceaccount=kube-system:tiller || true
       helm init --upgrade --service-account tiller --wait
+
+      helm repo add kubernetes-istio-module $${HELM_REPO}
+      helm repo update
+
+      kubectl create ns istio-system || true
+      helm upgrade istio kubernetes-istio-module/istio --install --wait \
+          --namespace istio-system \
+          --version $${ISTIO_VERSION}
     EOT
+
+    environment {
+      CA_CERTIFICATE = "${base64decode(google_container_cluster.gke_cluster.master_auth.0.cluster_ca_certificate)}"
+      K8S_SERVER     = "https://${google_container_cluster.gke_cluster.endpoint}"
+      K8S_USERNAME   = "${var.master_username}"
+      K8S_PASSWORD   = "${var.master_password}"
+      HELM_REPO      = "${var.helm_repository}"
+      ISTIO_VERSION  = "${var.istio_version}"
+    }
   }
 
   depends_on = ["google_container_node_pool.gke_node_pool"]
-}
-
-resource "helm_release" "istio" {
-  name       = "istio"
-  chart      = "istio"
-  repository = "${helm_repository.istio_repository.metadata.0.name}"
-  version    = "${var.istio_version}"
-
-  namespace = "istio-system"
-
-  set {
-    name  = "global.mtls.enabled"
-    value = true
-  }
-
-  set {
-    name  = "sidecar-injector.enabled"
-    value = true
-  }
-
-  set {
-    name  = "prometheus.enabled"
-    value = true
-  }
-
-  set {
-    name  = "grafana.enabled"
-    value = true
-  }
-
-  set {
-    name  = "tracing.enabled"
-    value = true
-  }
-
-  set {
-    name  = "servicegraph.enabled"
-    value = true
-  }
-
-  set {
-    name  = "security.identityDomain"
-    value = ""
-  }
-
-  depends_on = ["null_resource.helm_init"]
 }

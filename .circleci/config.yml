@@ -85,13 +85,6 @@ jobs:
             curl https://raw.githubusercontent.com/kubernetes/helm/master/scripts/get | bash
             helm init --client-only
       - run:
-          name: Install helm provider
-          command: |-
-            curl -Ls -o terraform-provider-helm.tar.gz https://github.com/mcuadros/terraform-provider-helm/releases/download/v0.6.0/terraform-provider-helm_v0.6.0_linux_amd64.tar.gz
-            tar -xzvf terraform-provider-helm.tar.gz
-            mkdir -p ~/.terraform.d/plugins/
-            mv terraform-provider-helm*/terraform-provider-helm ~/.terraform.d/plugins/
-      - run:
           name: Terraform apply
           command: |-
             terraform init
@@ -103,7 +96,7 @@ jobs:
               -var "master_password=$CLUSTER_PASSWORD" \
               -var "cluster_region=$GCP_REGION" \
               -var "helm_repository=$HELM_REPOSITORY" \
-              -var "istio_version=1.1.0" \
+              -var "istio_version=1.0.1" \
               -var "min_node_count=1" \
               -var "max_node_count=3"
       - run:
