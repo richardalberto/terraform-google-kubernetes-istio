@@ -10,6 +10,11 @@ variable "cluster_name" {
   description = "GKE cluster name"
 }
 
+variable "master_version" {
+  description = "Kubernetes cluster master version"
+  default     = "1.10.7-gke.1"
+}
+
 variable "master_username" {
   description = "GKE cluster master username"
 }
