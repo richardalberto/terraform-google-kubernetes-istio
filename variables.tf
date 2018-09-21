@@ -4,6 +4,7 @@ variable "gcp_project" {
 
 variable "gcp_region" {
   description = "The region in which all GCP resources will be launched."
+  default     = "us-east1"
 }
 
 variable "cluster_name" {
@@ -12,7 +13,7 @@ variable "cluster_name" {
 
 variable "master_version" {
   description = "Kubernetes cluster master version"
-  default     = "1.10.7-gke.1"
+  default     = "1.10.7-gke.2"
 }
 
 variable "master_username" {
