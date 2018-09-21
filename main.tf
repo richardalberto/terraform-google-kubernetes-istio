@@ -58,6 +58,10 @@ resource "google_container_node_pool" "gke_node_pool" {
 }
 
 resource "null_resource" "install_istio" {
+  triggers {
+    cluster_ep = "${google_container_cluster.gke_cluster.endpoint}"
+  }
+
   provisioner "local-exec" {
     command = <<EOT
       echo "$${CA_CERTIFICATE}" > ca.crt
