@@ -29,16 +29,20 @@ variable "cluster_region" {
 
 variable "helm_repository" {
   description = "Helm repository where the istio chart release is published"
+  default = "https://richardalberto.github.io/terraform-google-kubernetes-istio"
 }
 
 variable "istio_version" {
   description = "Istio chart version"
+  default = "1.0.1"
 }
 
 variable "min_node_count" {
   description = "GKE cluster initial node count and min node count value"
+  default = 1
 }
 
 variable "max_node_count" {
   description = "GKE cluster maximun node autoscaling count"
+  default = 3
 }
