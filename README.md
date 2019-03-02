@@ -11,7 +11,8 @@ module "k8s_cluster" {
   
   cluster_name    = "test-cluster"
   cluster_region  = "us-east4"
-  node_count      = 1
+  min_node_count  = 1
+  max_node_count  = 3
   master_username = "admin"
   master_password = "this_is_a_pretty_long_password_we_will_should_change!"
 
